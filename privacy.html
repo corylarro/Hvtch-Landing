@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hvtch Privacy Policy</title>
+    <meta name="description"
+        content="Learn how Hvtch handles file metadata, local processing, AI rule assistance, and permissions on macOS.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Geist+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0B0F;
+            --surface: #131318;
+            --surface-2: #1A1A21;
+            --rule: #232330;
+            --muted: #5A5A6E;
+            --sub: #A0A0B8;
+            --body: #C8C8DA;
+            --bright: #E2E2EE;
+            --white: #F4F4F8;
+            --warm: #E8923A;
+            --warm-soft: rgba(232, 146, 58, 0.08);
+            --green: #4ADE80;
+            --serif: 'Newsreader', Georgia, serif;
+            --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --mono: 'Geist Mono', 'SF Mono', monospace;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top, rgba(232, 146, 58, 0.08), transparent 30%),
+                var(--bg);
+            color: var(--body);
+            font-family: var(--sans);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        ::selection {
+            background: var(--warm);
+            color: var(--bg);
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(11, 11, 15, 0.86);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar-inner {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .logo {
+            font-family: var(--mono);
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--white);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--sub);
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a[aria-current="page"] {
+            color: var(--white);
+        }
+
+        .hero {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 112px 32px 44px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border: 1px solid rgba(232, 146, 58, 0.18);
+            background: var(--warm-soft);
+            border-radius: 999px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: var(--warm);
+            margin-bottom: 22px;
+        }
+
+        .hero h1 {
+            font-family: var(--serif);
+            font-size: clamp(44px, 6vw, 72px);
+            font-weight: 300;
+            line-height: 1.04;
+            letter-spacing: -1.2px;
+            color: var(--white);
+            max-width: 760px;
+            margin-bottom: 18px;
+        }
+
+        .hero p {
+            max-width: 720px;
+            font-size: 18px;
+            line-height: 1.75;
+            color: var(--sub);
+        }
+
+        .hero-meta {
+            margin-top: 24px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.6px;
+        }
+
+        .content {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 0 32px 96px;
+        }
+
+        .panel {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            border: 1px solid var(--rule);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.65);
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+        }
+
+        .toc {
+            padding: 32px 24px;
+            border-right: 1px solid var(--rule);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .toc-title {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        .toc ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .toc a {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--sub);
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--white);
+        }
+
+        .legal {
+            padding: 36px;
+        }
+
+        .legal section + section {
+            margin-top: 42px;
+            padding-top: 42px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .legal h2 {
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--white);
+            margin-bottom: 18px;
+        }
+
+        .legal p,
+        .legal li {
+            font-size: 16px;
+            line-height: 1.85;
+            color: var(--body);
+        }
+
+        .legal p + p,
+        .legal ul + p,
+        .legal p + ul {
+            margin-top: 16px;
+        }
+
+        .legal ul {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+        }
+
+        .legal li {
+            color: var(--sub);
+        }
+
+        .legal li::before {
+            content: "— ";
+            color: var(--warm);
+        }
+
+        .callout {
+            padding: 24px;
+            border: 1px solid rgba(232, 146, 58, 0.16);
+            background: var(--warm-soft);
+            border-radius: 18px;
+            margin-top: 18px;
+        }
+
+        .callout p {
+            color: var(--bright);
+        }
+
+        .foot {
+            border-top: 1px solid var(--rule);
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 28px 32px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .foot-copy {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .foot-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .foot-links a {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--sub);
+        }
+
+        .foot-links a:hover {
+            color: var(--bright);
+        }
+
+        @media (max-width: 860px) {
+            .panel-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                border-right: 0;
+                border-bottom: 1px solid var(--rule);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .topbar-inner,
+            .hero,
+            .content,
+            .foot {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .nav-links {
+                gap: 14px;
+            }
+
+            .legal {
+                padding: 26px 20px;
+            }
+
+            .foot {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="topbar">
+        <div class="topbar-inner">
+            <a href="index.html" class="logo">Hvtch</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="privacy.html" aria-current="page">Privacy</a>
+                <a href="terms.html">Terms</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="eyebrow">Privacy & Security</div>
+        <h1>Your files stay yours.</h1>
+        <p>Hvtch is built around a simple principle: file organization should work without compromising your privacy.
+            The app is designed to run locally on your Mac, use only the access you explicitly grant, and keep AI
+            assistance separate from your file system data.</p>
+        <div class="hero-meta">Effective date: March 27, 2026</div>
+    </header>
+
+    <main class="content">
+        <div class="panel">
+            <div class="panel-grid">
+                <aside class="toc">
+                    <div class="toc-title">On This Page</div>
+                    <ul>
+                        <li><a href="#promise">Our Privacy Promise</a></li>
+                        <li><a href="#reads">What Hvtch Reads</a></li>
+                        <li><a href="#local">What Stays Local</a></li>
+                        <li><a href="#ai">What the AI Sees</a></li>
+                        <li><a href="#byok">BYOK</a></li>
+                        <li><a href="#permissions">Permissions</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </aside>
+
+                <div class="legal">
+                    <section id="promise">
+                        <h2>Our Privacy Promise</h2>
+                        <p>Hvtch organizes files on your Mac without uploading your file contents to our servers. We
+                            designed the product so scans, rule matching, and rule execution can happen locally on your
+                            device.</p>
+                        <p>We do not sell your personal information. We do not use your files to train AI models. We
+                            do not inspect the contents of your documents, images, PDFs, code files, or folders as part
+                            of the core scanning engine.</p>
+                    </section>
+
+                    <section id="reads">
+                        <h2>What Hvtch Reads From Your Files</h2>
+                        <p>When scanning a folder, Hvtch reads basic file system metadata needed to match the rules you
+                            create. This may include:</p>
+                        <ul>
+                            <li>Filename</li>
+                            <li>File extension</li>
+                            <li>File size in bytes</li>
+                            <li>Creation date</li>
+                            <li>Last modified date</li>
+                            <li>Whether the item is a file or folder</li>
+                            <li>Whether the item is hidden</li>
+                        </ul>
+                        <p>For folders, Hvtch may also check the names of top-level items inside a directory to detect
+                            project types such as Xcode, Node.js, or Python projects. It does not open and parse the
+                            contents of those files to do that detection.</p>
+                        <div class="callout">
+                            <p>Hvtch does not read, open, parse, index, or analyze the contents of your files during
+                                scanning. It uses file system metadata, not document contents.</p>
+                        </div>
+                    </section>
+
+                    <section id="local">
+                        <h2>What Stays Local</h2>
+                        <p>All scanning runs on your Mac. Rule matching and execution are local processes with no cloud
+                            dependency, which means your metadata and folder structure do not need to leave your
+                            computer for Hvtch to work.</p>
+                        <p>If you lose internet access, your existing rules can still run. Hvtch is designed so core
+                            organization features continue to work offline.</p>
+                    </section>
+
+                    <section id="ai">
+                        <h2>What the AI Sees</h2>
+                        <p>If you use the Rule Assistant, the only data sent to an AI provider is the text you type
+                            into the prompt field, such as a plain-English description of the rule you want to create.</p>
+                        <p>The AI provider does not receive your filenames, file paths, folder names, folder contents,
+                            file sizes, dates, folder structure, or other file system metadata from your Mac unless you
+                            manually type that information into the prompt yourself.</p>
+                    </section>
+
+                    <section id="byok">
+                        <h2>Bring Your Own Key</h2>
+                        <p>Hvtch uses a BYOK model for AI features. You provide your own API key from a supported AI
+                            provider, such as OpenAI or Anthropic. Your API key is stored on your device using macOS
+                            system facilities and is sent directly to the provider you select.</p>
+                        <p>Hvtch does not proxy your AI requests through our servers, and we do not take custody of
+                            your API relationship with that provider.</p>
+                    </section>
+
+                    <section id="permissions">
+                        <h2>Permissions and Access</h2>
+                        <p>Hvtch accesses only the folders you explicitly choose. It uses macOS permission mechanisms,
+                            including security-scoped bookmarks where applicable, to retain access to those selected
+                            locations.</p>
+                        <p>Hvtch does not require full disk access to provide its core functionality. You can revoke
+                            access by removing a watched folder from the app or changing the relevant macOS permissions.</p>
+                    </section>
+
+                    <section id="contact">
+                        <h2>Contact and Updates</h2>
+                        <p>We may update this Privacy Policy as the product evolves. When we do, we will update the
+                            effective date on this page.</p>
+                        <p>If you have privacy questions, contact <a href="mailto:support@hvtch.app">support@hvtch.app</a>.
+                        </p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="foot">
+        <div class="foot-copy">©
+            <script>document.write(new Date().getFullYear())</script> Zero To Build LLC
+        </div>
+        <ul class="foot-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="privacy.html">Privacy</a></li>
+            <li><a href="terms.html">Terms</a></li>
+            <li><a href="mailto:support@hvtch.app">Support</a></li>
+        </ul>
+    </footer>
+</body>
+
+</html>

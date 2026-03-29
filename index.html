@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hvtch — File organizer for Mac</title>
+    <meta name="description"
+        content="Privacy-first file organization for macOS. Rules you control. AI that never sees your files.">
+        <link rel="icon" href="favicon.ico" sizes="any">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Geist+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B0B0F;
+            --surface: #131318;
+            --surface-2: #1A1A21;
+            --rule: #232330;
+            --muted: #5A5A6E;
+            --sub: #A0A0B8;
+            --body: #C8C8DA;
+            --bright: #E2E2EE;
+            --white: #F4F4F8;
+            --warm: #E8923A;
+            --warm-soft: rgba(232, 146, 58, 0.08);
+            --green: #4ADE80;
+            --serif: 'Newsreader', Georgia, serif;
+            --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --mono: 'Geist Mono', 'SF Mono', monospace;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--body);
+            font-family: var(--sans);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: var(--warm);
+            color: var(--bg);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* NAV */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            transition: all 0.3s;
+        }
+
+        .topbar.scrolled {
+            background: rgba(11, 11, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar-inner {
+            max-width: 1340px;
+            margin: 0 auto;
+            padding: 0 48px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: var(--mono);
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--white);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 36px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            color: var(--sub);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--white);
+        }
+
+        .nav-dl {
+            padding: 7px 18px;
+            border: 1px solid var(--muted);
+            border-radius: 6px;
+            color: var(--white) !important;
+            transition: all 0.2s;
+        }
+
+        .nav-dl:hover {
+            background: var(--white);
+            color: var(--bg) !important;
+            border-color: var(--white);
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 48px 80px;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(232, 146, 58, 0.03) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-family: var(--serif);
+            font-weight: 300;
+            font-size: clamp(48px, 6vw, 84px);
+            line-height: 1.1;
+            color: var(--white);
+            margin-bottom: 28px;
+            position: relative;
+            letter-spacing: -1px;
+            opacity: 0;
+            animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+        }
+
+        .hero-sub {
+            font-size: 18px;
+            line-height: 1.7;
+            color: var(--sub);
+            max-width: 520px;
+            margin-bottom: 44px;
+            opacity: 0;
+            animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            background: var(--white);
+            color: var(--bg);
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary svg {
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover svg {
+            transform: translateX(3px);
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--sub);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--muted);
+            color: var(--white);
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 28px;
+            opacity: 0;
+            animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards;
+        }
+
+        .hero-meta span {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* SCREEN */
+        .screen-wrap {
+            padding: 0 48px;
+            max-width: 1340px;
+            margin: 0 auto 160px;
+        }
+
+        .screen {
+            border: 1px solid var(--rule);
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--surface);
+            box-shadow: 0 60px 120px -30px rgba(0, 0, 0, 0.6);
+        }
+
+        .screen-bar {
+            height: 38px;
+            background: var(--surface-2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 6px;
+        }
+
+        .screen-bar i {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--rule);
+        }
+
+        .screen-body {
+            aspect-ratio: 16/9.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .screen-body img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* SECTION LABEL */
+        .section-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding-top: 8px;
+            position: sticky;
+            top: 100px;
+            align-self: start;
+        }
+
+        /* HOW IT WORKS */
+        .how {
+            max-width: 1340px;
+            margin: 0 auto 160px;
+            padding: 0 48px;
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 100px;
+        }
+
+        .how-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 56px;
+            max-width: 560px;
+        }
+
+        .how-step {
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            gap: 20px;
+        }
+
+        .step-num {
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--muted);
+            width: 48px;
+            height: 48px;
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .how-step h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 6px;
+        }
+
+        .how-step p {
+            font-size: 14px;
+            line-height: 1.75;
+            color: var(--sub);
+        }
+
+        /* PROMISES */
+        .promises {
+            max-width: 1340px;
+            margin: 0 auto 180px;
+            padding: 0 48px;
+        }
+
+        .promises-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--rule);
+            border: 1px solid var(--rule);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .promise {
+            background: var(--bg);
+            padding: 44px 36px;
+        }
+
+        .promise-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--surface-2);
+            border: 1px solid var(--rule);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .promise-icon svg {
+            width: 18px;
+            height: 18px;
+            color: var(--sub);
+        }
+
+        .promise h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 10px;
+        }
+
+        .promise p {
+            font-size: 14px;
+            line-height: 1.75;
+            color: var(--sub);
+        }
+
+        /* FEATURES */
+        .features {
+            max-width: 1340px;
+            margin: 0 auto 180px;
+            padding: 0 48px;
+        }
+
+        .feat-header {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 100px;
+            margin-bottom: 64px;
+        }
+
+        .feat-header h2 {
+            font-family: var(--serif);
+            font-size: 36px;
+            font-weight: 300;
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        .feat-header h2 em {
+            font-style: italic;
+        }
+
+        .feat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+        }
+
+        .feat-cell {
+            background: var(--surface);
+            padding: 48px 44px;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: background 0.3s;
+        }
+
+        .feat-cell:hover {
+            background: var(--surface-2);
+        }
+
+        .feat-cell.span {
+            grid-row: span 2;
+        }
+
+        .feat-cell.warm-bg {
+            background: var(--warm-soft);
+        }
+
+        .feat-cell.warm-bg:hover {
+            background: rgba(232, 146, 58, 0.12);
+        }
+
+        .feat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--rule);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .feat-icon svg {
+            width: 16px;
+            height: 16px;
+            color: var(--sub);
+        }
+
+        .feat-cell.warm-bg .feat-icon {
+            background: rgba(232, 146, 58, 0.1);
+            border-color: rgba(232, 146, 58, 0.15);
+        }
+
+        .feat-cell.warm-bg .feat-icon svg {
+            color: var(--warm);
+        }
+
+        .feat-cell h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .feat-cell p {
+            font-size: 14px;
+            line-height: 1.75;
+            color: var(--sub);
+            max-width: 360px;
+        }
+
+        .code-block {
+            font-family: var(--mono);
+            font-size: 12px;
+            line-height: 2.1;
+            color: var(--sub);
+            margin-top: 24px;
+            padding: 20px 24px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .code-block .kw {
+            color: var(--warm);
+        }
+
+        .code-block .val {
+            color: var(--green);
+        }
+
+        /* PRICING */
+        .pricing {
+            max-width: 1340px;
+            margin: 0 auto 180px;
+            padding: 0 48px;
+        }
+
+        .pricing-header {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 100px;
+            margin-bottom: 64px;
+        }
+
+        .pricing-header h2 {
+            font-family: var(--serif);
+            font-size: 36px;
+            font-weight: 300;
+            color: var(--white);
+            line-height: 1.2;
+        }
+
+        .pricing-header h2 em {
+            font-style: italic;
+        }
+
+        .pricing-header p {
+            font-size: 15px;
+            color: var(--sub);
+            line-height: 1.75;
+            max-width: 420px;
+            padding-top: 8px;
+        }
+
+        .tiers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--rule);
+            border: 1px solid var(--rule);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .tier {
+            background: var(--bg);
+            padding: 48px 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tier.pop {
+            background: var(--surface);
+        }
+
+        .tier-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+        }
+
+        .tier.pop .tier-label {
+            color: var(--warm);
+        }
+
+        .tier-price {
+            font-size: 44px;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: -2px;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .tier-price .per {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--muted);
+            letter-spacing: 0;
+        }
+
+        .tier-sub {
+            font-size: 14px;
+            color: var(--sub);
+            margin-bottom: 36px;
+        }
+
+        .tier-list {
+            list-style: none;
+            flex: 1;
+            margin-bottom: 36px;
+        }
+
+        .tier-list li {
+            font-size: 14px;
+            color: var(--bright);
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tier-list li::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .tier.pop .tier-list li::before {
+            background: var(--warm);
+        }
+
+        .tier-list li.off {
+            color: var(--muted);
+        }
+
+        .btn-tier {
+            display: block;
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-tier.solid {
+            background: var(--white);
+            color: var(--bg);
+        }
+
+        .btn-tier.solid:hover {
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-tier.ghost {
+            border: 1px solid var(--rule);
+            color: var(--bright);
+        }
+
+        .btn-tier.ghost:hover {
+            border-color: var(--muted);
+            color: var(--white);
+        }
+
+        .pricing-note {
+            text-align: center;
+            margin-top: 20px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* CLOSE */
+        .close {
+            text-align: center;
+            padding: 100px 48px 140px;
+            position: relative;
+        }
+
+        .close::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 350px;
+            background: radial-gradient(ellipse, rgba(232, 146, 58, 0.04), transparent);
+            pointer-events: none;
+        }
+
+        .close h2 {
+            font-family: var(--serif);
+            font-size: clamp(28px, 3vw, 40px);
+            font-weight: 300;
+            color: var(--white);
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .close p {
+            font-size: 15px;
+            color: var(--sub);
+            margin-bottom: 32px;
+        }
+
+        /* FOOTER */
+        .foot {
+            border-top: 1px solid var(--rule);
+            max-width: 1340px;
+            margin: 0 auto;
+            padding: 32px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .foot-copy {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .foot-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+        }
+
+        .foot-links a {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--sub);
+            transition: color 0.2s;
+        }
+
+        .foot-links a:hover {
+            color: var(--bright);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+
+            .how,
+            .feat-header,
+            .pricing-header {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .section-label {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .topbar-inner,
+            .hero,
+            .screen-wrap,
+            .how,
+            .promises,
+            .features,
+            .pricing,
+            .close,
+            .foot {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+
+            .promises-grid,
+            .tiers {
+                grid-template-columns: 1fr;
+            }
+
+            .feat-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feat-cell.span {
+                grid-row: span 1;
+            }
+
+            .nav-links {
+                gap: 20px;
+            }
+
+            .foot {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-primary,
+            .btn-ghost {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hero-meta {
+                flex-wrap: wrap;
+                gap: 16px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="topbar" id="nav">
+        <div class="topbar-inner">
+            <a href="#" class="logo">Hvtch</a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="https://github.com/corylarro/hvtch-releases/releases/latest/download/Hvtch-1.0.1.dmg"
+                    class="nav-dl">Download</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>A clean Desktop changes<br>how you think.</h1>
+        <p class="hero-sub">Hvtch is a privacy-first file organizer for Mac. Create rules that automatically sort your
+            files and folders — describe them in plain English or build them yourself. AI helps write rules, but never
+            sees your files.</p>
+        <div class="hero-actions">
+            <a href="https://github.com/corylarro/hvtch-releases/releases/latest/download/Hvtch-1.0.1.dmg"
+                class="btn-primary">
+                Download for Mac
+                <svg width="14" height="14" fill="none" viewBox="0 0 14 14">
+                    <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </a>
+            <a href="#features" class="btn-ghost">See how it works</a>
+        </div>
+        <div class="hero-meta"><span>macOS Sonoma+</span><span>Free tier</span><span>No account needed</span></div>
+    </section>
+
+    <div class="screen-wrap" style="max-width: 1000px;">
+        <div class="screen"
+            style="border: none; border-radius: 10px; background: transparent; box-shadow: 0 60px 120px -30px rgba(0,0,0,0.6);">
+            <img src="screenshot.png" alt="Hvtch — file organizer for Mac"
+                style="width: 100%; border-radius: 10px; display: block;">
+        </div>
+    </div>
+
+    <section class="how">
+        <div class="section-label">How it works</div>
+        <div class="how-steps">
+            <div class="how-step">
+                <div class="step-num">01</div>
+                <div>
+                    <h3>Pick a folder</h3>
+                    <p>Choose any folder to organize — your Desktop, Downloads, Documents. Hvtch scans it and shows you
+                        what's inside.</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="step-num">02</div>
+                <div>
+                    <h3>Create a rule</h3>
+                    <p>Type what you want in plain English — "Move old screenshots to a Screenshots folder" — or build a
+                        rule manually. Either way, it runs locally.</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="step-num">03</div>
+                <div>
+                    <h3>Review and execute</h3>
+                    <p>Hvtch shows you exactly what will happen before it does anything. Approve the matches, uncheck
+                        what you want to keep. You're always in control.</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="step-num">04</div>
+                <div>
+                    <h3>Let it run</h3>
+                    <p>Set rules to run on a schedule — hourly, daily, or weekly. Hvtch watches from the menu bar. Every
+                        move is undoable.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="promises">
+        <div class="promises-grid">
+            <div class="promise">
+                <div class="promise-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" />
+                        <path d="M7 11V7a5 5 0 0110 0v4" />
+                    </svg>
+                </div>
+                <h3>Files stay on your Mac</h3>
+                <p>Every scan, every rule, every file move runs locally. No cloud processing. Works fully offline.</p>
+            </div>
+            <div class="promise">
+                <div class="promise-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                        <line x1="2" y1="2" x2="22" y2="22" />
+                    </svg>
+                </div>
+                <h3>AI never sees your files</h3>
+                <p>The AI reads your typed descriptions only. Never filenames, paths, contents, or any metadata from
+                    your Mac.</p>
+            </div>
+            <div class="promise">
+                <div class="promise-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="1 4 1 10 7 10" />
+                        <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+                    </svg>
+                </div>
+                <h3>Everything is undoable</h3>
+                <p>Every file move is tracked. Restore one file or undo an entire batch. Nothing is ever deleted.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="feat-header">
+            <div class="section-label">Features</div>
+            <h2>One tool.<br><em>Clean Desktop.</em></h2>
+        </div>
+        <div class="feat-grid">
+            <div class="feat-cell span">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                    </svg>
+                </div>
+                <h3>Describe what you want. Hvtch builds the rule.</h3>
+                <p>Type a sentence. Get a rule that runs locally, forever, with zero network dependency. Uses your own
+                    OpenAI or Anthropic key.</p>
+                <div class="code-block">
+                    <span class="kw">when</span> name contains <span class="val">"Screenshot"</span><br>
+                    &nbsp;&nbsp;<span class="kw">and</span> older than <span class="val">30 days</span><br>
+                    <span class="kw">then</span> move → <span class="val">~/Screenshots/</span><br>
+                    <span class="kw">every</span> <span class="val">week</span>
+                </div>
+            </div>
+            <div class="feat-cell">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" />
+                        <polyline points="13 2 13 9 20 9" />
+                    </svg>
+                </div>
+                <h3>Sort by type, age, size, or name</h3>
+                <p>Move old screenshots to a folder. Archive downloads older than 30 days. Organize PDFs, images,
+                    documents — whatever's piling up.</p>
+            </div>
+            <div class="feat-cell warm-bg">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                </div>
+                <h3>Teach Me Once</h3>
+                <p>When Hvtch finds files with no rule, it asks what to do — once. Your answer becomes a permanent rule.
+                </p>
+            </div>
+            <div class="feat-cell">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                </div>
+                <h3>Scheduled scans</h3>
+                <p>Set rules to run hourly, daily, or weekly. Hvtch watches from the menu bar and notifies you when
+                    files move.</p>
+            </div>
+            <div class="feat-cell">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                    </svg>
+                </div>
+                <h3>Organize folders too</h3>
+                <p>Sort folders by name, age, or project type — Xcode, Node.js, Python, and more. Not just files.</p>
+            </div>
+            <div class="feat-cell">
+                <div class="feat-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <h3>Metadata only</h3>
+                <p>Reads filenames, sizes, and dates — the same info you see in Finder. Never opens or analyzes file
+                    contents.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <div class="pricing-header">
+            <div class="section-label">Pricing</div>
+            <div>
+                <h2>Start free.<br>Go <em>Pro</em> when ready.</h2>
+                <p>No account needed. No credit card for the free tier. Download and start organizing in a minute.</p>
+            </div>
+        </div>
+        <div class="tiers">
+            <div class="tier">
+                <div class="tier-label">Free</div>
+                <div class="tier-price">$0</div>
+                <div class="tier-sub">Get organized</div>
+                <ul class="tier-list">
+                    <li>3 rules</li>
+                    <li>Manual scans</li>
+                    <li>Archive & undo</li>
+                    <li>Teach Me Once</li>
+                    <li class="off">AI rule creation</li>
+                    <li class="off">Scheduled scans</li>
+                </ul>
+                <a href="https://github.com/corylarro/hvtch-releases/releases/latest/download/Hvtch-1.0.1.dmg"
+                    class="btn-tier ghost">Download Free</a>
+            </div>
+            <div class="tier pop">
+                <div class="tier-label">Pro</div>
+                <div class="tier-price">$29 <span class="per">/yr</span></div>
+                <div class="tier-sub">Unlimited everything</div>
+                <ul class="tier-list">
+                    <li>Unlimited rules</li>
+                    <li>Scheduled scans</li>
+                    <li>AI rule creation (BYOK)</li>
+                    <li>OpenAI + Anthropic</li>
+                    <li>All future features</li>
+                </ul>
+                <a href="https://zerotobuild.lemonsqueezy.com/checkout/buy/cf7fef3d-0aed-463a-8f12-9a0ce22ba45d"
+                    class="btn-tier solid">Get Pro</a>
+            </div>
+            <div class="tier">
+                <div class="tier-label">Lifetime</div>
+                <div class="tier-price">$89</div>
+                <div class="tier-sub">Pro forever</div>
+                <ul class="tier-list">
+                    <li>Everything in Pro</li>
+                    <li>One-time payment</li>
+                    <li>All future updates</li>
+                    <li>No subscription</li>
+                    <li>Early adopter price</li>
+                </ul>
+                <a href="https://zerotobuild.lemonsqueezy.com/checkout/buy/53c69bd4-5a87-4ef0-87a2-dca703b1d4dc"
+                    class="btn-tier ghost">Get Lifetime</a>
+            </div>
+        </div>
+        <p class="pricing-note">Lifetime limited to first 200 buyers</p>
+    </section>
+
+    <section class="close">
+        <h2>Your files, your rules, your Mac.</h2>
+        <p>No cloud. No data collected. Just a cleaner Desktop.</p>
+        <a href="https://github.com/corylarro/hvtch-releases/releases/latest/download/Hvtch-1.0.1.dmg"
+            class="btn-primary">Download for Mac — Free
+            <svg width="14" height="14" fill="none" viewBox="0 0 14 14">
+                <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+        </a>
+    </section>
+
+    <footer class="foot">
+        <div class="foot-copy">©
+            <script>document.write(new Date().getFullYear())</script> Zero To Build LLC
+        </div>
+        <ul class="foot-links">
+            <li><a href="mailto:support@hvtch.app">Support</a></li>
+            <li><a href="privacy.html">Privacy</a></li>
+            <li><a href="terms.html">Terms</a></li>
+        </ul>
+    </footer>
+
+    <script>
+        const n = document.getElementById('nav');
+        window.addEventListener('scroll', () => n.classList.toggle('scrolled', window.scrollY > 20));
+    </script>
+
+</body>
+
+</html>
